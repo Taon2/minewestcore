@@ -3,11 +3,9 @@ package net.minewest.minewestcore.bedutil.listeners;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.minewest.minewestcore.MinewestCorePlugin;
 import net.minewest.minewestcore.bedutil.commands.SleepCommand;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -20,9 +18,6 @@ public class PlayerListener implements Listener {
         if (event.getBedEnterResult() != PlayerBedEnterEvent.BedEnterResult.OK) return;
 
         Bukkit.broadcastMessage(ChatColor.GOLD + event.getPlayer().getName() + " wants to sleep.");
-
-        SleepCommand.clearPlayers();
-        MinewestCorePlugin.getInstance().getBedSleepManager().resetSleepRequests();
 
         BaseComponent[] c = new ComponentBuilder("- ")
                 .color(net.md_5.bungee.api.ChatColor.DARK_GRAY)
@@ -44,13 +39,5 @@ public class PlayerListener implements Listener {
 
         if (!SleepCommand.getPlayers().contains(event.getPlayer().getUniqueId()))
             event.getPlayer().performCommand("sleep accept");
-    }
-
-    public static boolean day(World world) {
-        if (world == null) return false;
-
-        long time = world.getTime();
-
-        return time < 12541 || time > 23458;
     }
 }

@@ -1,5 +1,6 @@
 package net.minewest.minewestcore.bedutil;
 
+import net.minewest.minewestcore.bedutil.commands.SleepCommand;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
@@ -41,5 +42,16 @@ public class BedSleepManager {
             requests = 0;
         }
         Bukkit.broadcastMessage(ChatColor.GOLD + "Requests met!");
+
+        SleepCommand.clearPlayers();
+        resetSleepRequests();
+    }
+
+    public boolean day(World world) {
+        if (world == null) return false;
+
+        long time = world.getTime();
+
+        return time < 12541 || time > 23458;
     }
 }

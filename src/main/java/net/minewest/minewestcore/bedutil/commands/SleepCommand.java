@@ -1,7 +1,7 @@
 package net.minewest.minewestcore.bedutil.commands;
 
+import net.minewest.minewestcore.MinewestCorePlugin;
 import net.minewest.minewestcore.bedutil.BedSleepManager;
-import net.minewest.minewestcore.bedutil.listeners.PlayerListener;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -16,7 +16,7 @@ import java.util.UUID;
 public class SleepCommand implements CommandExecutor {
 
     private BedSleepManager manager;
-    private static List<UUID> players = new ArrayList();
+    private static List<UUID> players = new ArrayList<UUID>();
 
     public SleepCommand(BedSleepManager manager) {
         this.manager = manager;
@@ -33,9 +33,11 @@ public class SleepCommand implements CommandExecutor {
         boolean isThundering = player.getWorld().isThundering();
         boolean thunderstorm = hasStorm && isThundering;
 
-        if (thunderstorm && PlayerListener.day(player.getWorld()))  {
-            commandSender.sendMessage(ChatColor.RED + "You can only do this at night or during a thunderstorm!");
-            return true;
+        if (MinewestCorePlugin.getInstance().getBedSleepManager().day(player.getWorld()))  {
+            if (!thunderstorm) {
+                commandSender.sendMessage(ChatColor.RED + "You can only do this at night or during a thunderstorm!");
+                return true;
+            }
         }
 
         if (players.contains(((Player) commandSender).getUniqueId())) {
@@ -45,10 +47,12 @@ public class SleepCommand implements CommandExecutor {
 
         if (args[0].equals("accept")) {
             manager.increaseSleepRequest();
-            Bukkit.broadcastMessage(ChatColor.WHITE + Integer.toString(manager.getRequests()) + "/" + manager.getNeededRequests() + " " + ChatColor.GREEN + commandSender.getName() + " has accepted.");
+            Bukkit.broadcastMessage(ChatColor.WHITE + Integer.toString(manager.getRequests()) + "/" +
+                    manager.getNeededRequests() + " " + ChatColor.GREEN + commandSender.getName() + " has accepted.");
         } else if (args[0].equals("deny")) {
             manager.decreaseSleepRequest();
-            Bukkit.broadcastMessage(ChatColor.WHITE + Integer.toString(manager.getRequests()) + "/" + manager.getNeededRequests() + " " + ChatColor.RED + commandSender.getName() + " has denied.");
+            Bukkit.broadcastMessage(ChatColor.WHITE + Integer.toString(manager.getRequests()) + "/" +
+                    manager.getNeededRequests() + " " + ChatColor.RED + commandSender.getName() + " has denied.");
         }
 
         players.add(player.getUniqueId());
