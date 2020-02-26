@@ -17,7 +17,7 @@ import java.util.UUID;
 public class SleepCommand implements CommandExecutor {
 
     private BedSleepManager manager;
-    private static Set<UUID> players = new HashSet<>();
+    private static Set<UUID> players = new HashSet<UUID>();
 
     public SleepCommand(BedSleepManager manager) {
         this.manager = manager;
@@ -39,19 +39,13 @@ public class SleepCommand implements CommandExecutor {
             return false;
         }
 
-        boolean hasStorm = player.getWorld().hasStorm();
-        boolean isThundering = player.getWorld().isThundering();
-        boolean thunderstorm = hasStorm && isThundering;
-
-        BedSleepManager manager = MinewestCorePlugin.getInstance().getBedSleepManager();
-
         if (!manager.isValidPlayer(player)) {
             commandSender.sendMessage(ChatColor.RED + "You can are not in an appropriate world!");
             return true;
         }
 
         if (manager.isDay(player.getWorld())) {
-            if (!thunderstorm) {
+            if (!manager.isThundering(player.getWorld())) {
                 commandSender.sendMessage(ChatColor.RED + "You can only do this at night or during a thunderstorm!");
                 return true;
             }
@@ -66,7 +60,7 @@ public class SleepCommand implements CommandExecutor {
             manager.increaseSleepRequest();
             Bukkit.broadcastMessage(ChatColor.WHITE + Integer.toString(manager.getRequests()) + "/" +
                     manager.getNeededRequests() + " " + ChatColor.GREEN + commandSender.getName() + " has accepted.");
-        } else if (deny) {
+        } else {
             manager.decreaseSleepRequest();
             Bukkit.broadcastMessage(ChatColor.WHITE + Integer.toString(manager.getRequests()) + "/" +
                     manager.getNeededRequests() + " " + ChatColor.RED + commandSender.getName() + " has denied.");
