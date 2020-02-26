@@ -34,7 +34,13 @@ public class BedSleepManager {
             return 1;
         }
 
-        return (int) (REQUIRED_PLAYER_RATIO * getValidPlayers());
+        int needed = (int) (REQUIRED_PLAYER_RATIO * getValidPlayers());
+
+        if (needed == 0) {
+            return 1;
+        }
+
+        return needed;
     }
 
     private int getValidPlayers() {
