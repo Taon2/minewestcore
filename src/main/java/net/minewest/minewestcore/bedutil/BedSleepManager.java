@@ -57,9 +57,16 @@ public class BedSleepManager {
         if (requests < getNeededRequests()) return;
 
         for (World world : Bukkit.getWorlds()) {
-            world.setTime(1000);
-            requests = 0;
+            if (!isDay(world)) {
+                world.setTime(1000);
+            }
+
+            if (isThundering(world)) {
+                world.setThundering(false);
+                world.setStorm(false);
+            }
         }
+        requests = 0;
         Bukkit.broadcastMessage(ChatColor.GOLD + "Requests met!");
 
         SleepCommand.clearPlayers();
@@ -72,5 +79,13 @@ public class BedSleepManager {
         long time = world.getTime();
 
         return time < 12541 || time > 23458;
+    }
+
+    public boolean isThundering(World world) {
+        if (world == null) return false;
+
+        boolean hasStorm = world.hasStorm();
+        boolean isThundering = world.isThundering();
+        return (hasStorm && isThundering);
     }
 }
