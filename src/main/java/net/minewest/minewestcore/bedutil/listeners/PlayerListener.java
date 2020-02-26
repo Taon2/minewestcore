@@ -15,7 +15,9 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void onPlayerSleepEvent(PlayerBedEnterEvent event) {
-        if (event.getBedEnterResult() != PlayerBedEnterEvent.BedEnterResult.OK) return;
+        if (event.getBedEnterResult() != PlayerBedEnterEvent.BedEnterResult.OK) {
+            return;
+        }
 
         Bukkit.broadcastMessage(ChatColor.GOLD + event.getPlayer().getName() + " wants to sleep.");
 
@@ -37,7 +39,8 @@ public class PlayerListener implements Listener {
             player.spigot().sendMessage(c);
         }
 
-        if (!SleepCommand.getPlayers().contains(event.getPlayer().getUniqueId()))
+        if (!SleepCommand.getPlayers().contains(event.getPlayer().getUniqueId())) {
             event.getPlayer().performCommand("sleep accept");
+        }
     }
 }
