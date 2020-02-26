@@ -24,12 +24,12 @@ public class MinewestCorePlugin extends JavaPlugin {
         // Every 30 seconds, if it is day, reset the bed information
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, new Runnable() {
             public void run() {
-                if (manager.day(getServer().getWorld("world"))) {
+                if (manager.isDay(getServer().getWorld("world"))) {
                     SleepCommand.clearPlayers();
                     manager.resetSleepRequests();
                 }
             }
-        },0, 600);
+        }, 0, 600);
     }
 
     public static MinewestCorePlugin getInstance() {

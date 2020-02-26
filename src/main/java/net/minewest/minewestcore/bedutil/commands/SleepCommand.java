@@ -9,14 +9,15 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 public class SleepCommand implements CommandExecutor {
 
     private BedSleepManager manager;
-    private static List<UUID> players = new ArrayList<UUID>();
+    private static Set<UUID> players = new HashSet<>();
 
     public SleepCommand(BedSleepManager manager) {
         this.manager = manager;
@@ -25,31 +26,47 @@ public class SleepCommand implements CommandExecutor {
     public boolean onCommand(final CommandSender commandSender, Command command, String s, String[] args) {
         final Player player = (Player) commandSender;
 
-        if (args.length == 0) {
-            commandSender.sendMessage(ChatColor.WHITE + "Usage: " + ChatColor.RED + "/sleep [accept/deny]");
+        if (args.length != 1) {
+            sendUsage(commandSender);
+            return false;
+        }
+
+        boolean accept = args[0].equals("accept");
+        boolean deny = args[0].equals("deny");
+
+        if (!accept && !deny) {
+            sendUsage(commandSender);
+            return false;
         }
 
         boolean hasStorm = player.getWorld().hasStorm();
         boolean isThundering = player.getWorld().isThundering();
         boolean thunderstorm = hasStorm && isThundering;
 
-        if (MinewestCorePlugin.getInstance().getBedSleepManager().day(player.getWorld()))  {
+        BedSleepManager manager = MinewestCorePlugin.getInstance().getBedSleepManager();
+
+        if (!manager.isValidPlayer(player)) {
+            commandSender.sendMessage(ChatColor.RED + "You can are not in an appropriate world!");
+            return true;
+        }
+
+        if (manager.isDay(player.getWorld())) {
             if (!thunderstorm) {
                 commandSender.sendMessage(ChatColor.RED + "You can only do this at night or during a thunderstorm!");
                 return true;
             }
         }
 
-        if (players.contains(((Player) commandSender).getUniqueId())) {
+        if (players.contains(player.getUniqueId())) {
             commandSender.sendMessage(ChatColor.RED + "You have already selected an option!");
             return true;
         }
 
-        if (args[0].equals("accept")) {
+        if (accept) {
             manager.increaseSleepRequest();
             Bukkit.broadcastMessage(ChatColor.WHITE + Integer.toString(manager.getRequests()) + "/" +
                     manager.getNeededRequests() + " " + ChatColor.GREEN + commandSender.getName() + " has accepted.");
-        } else if (args[0].equals("deny")) {
+        } else if (deny) {
             manager.decreaseSleepRequest();
             Bukkit.broadcastMessage(ChatColor.WHITE + Integer.toString(manager.getRequests()) + "/" +
                     manager.getNeededRequests() + " " + ChatColor.RED + commandSender.getName() + " has denied.");
@@ -61,7 +78,11 @@ public class SleepCommand implements CommandExecutor {
         return true;
     }
 
-    public static List<UUID> getPlayers() {
+    private static void sendUsage(final CommandSender commandSender) {
+        commandSender.sendMessage(ChatColor.WHITE + "Usage: " + ChatColor.RED + "/sleep [accept/deny]");
+    }
+
+    public static Collection<UUID> getPlayers() {
         return players;
     }
 
