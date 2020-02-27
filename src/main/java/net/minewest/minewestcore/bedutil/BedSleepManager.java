@@ -77,9 +77,7 @@ public class BedSleepManager {
         long currentTime = Bukkit.getWorld("world").getTime();
         long timeUntilMorning = (DAY_LENGTH + MORNING_START - currentTime) % DAY_LENGTH;
 
-        if (morningDisableTask != null) {
-            morningDisableTask.cancel();
-        }
+        cancelDisable();
 
         morningDisableTask = Bukkit.getScheduler().runTaskTimerAsynchronously(MinewestCorePlugin.getInstance(), new Runnable() {
             public void run() {
@@ -88,12 +86,20 @@ public class BedSleepManager {
         }, timeUntilMorning, DAY_LENGTH);
     }
 
+    private void cancelDisable() {
+        if (morningDisableTask != null) {
+            morningDisableTask.cancel();
+        }
+    }
+
     private boolean getEnabled() {
         return !sleepingPlayers.isEmpty();
     }
 
     public void setEnabled(UUID enablingPlayer) {
-        sleepingPlayers.add(enablingPlayer);
+        if (enablingPlayer != null) {
+            sleepingPlayers.add(enablingPlayer);
+        }
         if (getEnabled()) {
             autoDisable();
         }
@@ -158,5 +164,6 @@ public class BedSleepManager {
 
         Bukkit.broadcastMessage(ChatColor.GOLD + "Requests met!");
         resetRequests();
+        cancelDisable();
     }
 }
