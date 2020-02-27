@@ -11,6 +11,19 @@ public class MinewestCorePlugin extends JavaPlugin {
     private static MinewestCorePlugin instance;
     private BedSleepManager manager;
 
+
+    // See https://minecraft.gamepedia.com/Day-night_cycle
+    public static final int DAY_LENGTH = 24000;
+
+    // Time when using the `/time set day` command.
+    public static final int MORNING_START = 1000;
+
+    // 12542: In clear weather, beds can be used at this point.
+    public static final int BED_START = 12542;
+
+    // 23460: In clear weather, beds can no longer be used.
+    public static final int BED_END = 23460;
+
     @Override
     public void onEnable() {
         instance = this;
@@ -21,15 +34,14 @@ public class MinewestCorePlugin extends JavaPlugin {
 
         Bukkit.getPluginManager().registerEvents(new PlayerListener(), this);
 
-        // Every 30 seconds, if it is day, reset the bed information
+        long currentTime = Bukkit.getWorld("world").getTime();
+        long timeUntilMorning = (DAY_LENGTH + MORNING_START - currentTime) % DAY_LENGTH;
+
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, new Runnable() {
             public void run() {
-                if (manager.isDay(getServer().getWorld("world"))) {
-                    SleepCommand.clearPlayers();
-                    manager.resetSleepRequests();
-                }
+                manager.setEnabled(false);
             }
-        }, 0, 600);
+        }, timeUntilMorning, DAY_LENGTH);
     }
 
     public static MinewestCorePlugin getInstance() {

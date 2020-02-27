@@ -1,46 +1,63 @@
 package net.minewest.minewestcore.bedutil;
 
-import net.minewest.minewestcore.bedutil.commands.SleepCommand;
+import net.minewest.minewestcore.MinewestCorePlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
 public class BedSleepManager {
 
     private static final float REQUIRED_PLAYER_RATIO = 0.5f;
+    private static final int MINIMUM_ABSOLUTE_REQUESTS = 1;
 
-    private int requests = 0;
+    private Map<UUID, Boolean> requests = new HashMap<UUID, Boolean>();
+    private boolean sleepingEnabled = false;
 
-    public void increaseSleepRequest() {
-        requests++;
+    public void setEnabled(boolean enabled) {
+        sleepingEnabled = enabled;
+        if (!enabled) {
+            resetRequests();
+        }
     }
 
-    public void decreaseSleepRequest() {
-        requests--;
+    public void castVote(UUID player, boolean accept) {
+        if (sleepingEnabled) {
+            requests.put(player, accept);
+            checkRequired();
+        }
     }
 
-    public void resetSleepRequests() {
-        requests = 0;
+    public boolean hasVoted(UUID player) {
+        return requests.containsKey(player);
+    }
+
+    public void removePlayer(UUID player) {
+        requests.remove(player);
+        checkRequired();
+    }
+
+    private void resetRequests() {
+        requests.clear();
     }
 
     public int getRequests() {
-        return requests;
+        int acceptances = 0;
+        for (UUID player : requests.keySet()) {
+            if (requests.get(player)) {
+                acceptances++;
+            }
+        }
+        return acceptances;
     }
 
     public int getNeededRequests() {
-
-        if (Bukkit.getOnlinePlayers().size() == 1) {
-            return 1;
-        }
-
         int needed = (int) (REQUIRED_PLAYER_RATIO * getValidPlayers());
-
-        if (needed == 0) {
-            return 1;
-        }
-
-        return needed;
+        return Math.max(needed, MINIMUM_ABSOLUTE_REQUESTS);
     }
 
     private int getValidPlayers() {
@@ -59,12 +76,14 @@ public class BedSleepManager {
         return p.getWorld().equals(overworld);
     }
 
-    public void checkRequired() {
-        if (requests < getNeededRequests()) return;
+    private void checkRequired() {
+        if (getRequests() < getNeededRequests()) {
+            return;
+        }
 
         for (World world : Bukkit.getWorlds()) {
             if (!isDay(world)) {
-                world.setTime(1000);
+                world.setTime(MinewestCorePlugin.MORNING_START);
             }
 
             if (isThundering(world)) {
@@ -72,23 +91,24 @@ public class BedSleepManager {
                 world.setStorm(false);
             }
         }
-        requests = 0;
         Bukkit.broadcastMessage(ChatColor.GOLD + "Requests met!");
-
-        SleepCommand.clearPlayers();
-        resetSleepRequests();
+        resetRequests();
     }
 
     public boolean isDay(World world) {
-        if (world == null) return false;
+        if (world == null) {
+            return false;
+        }
 
         long time = world.getTime();
 
-        return time < 12541 || time > 23458;
+        return time < MinewestCorePlugin.BED_START || time >= MinewestCorePlugin.BED_END;
     }
 
     public boolean isThundering(World world) {
-        if (world == null) return false;
+        if (world == null) {
+            return false;
+        }
 
         boolean hasStorm = world.hasStorm();
         boolean isThundering = world.isThundering();
