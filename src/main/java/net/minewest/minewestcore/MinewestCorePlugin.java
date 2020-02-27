@@ -39,7 +39,7 @@ public class MinewestCorePlugin extends JavaPlugin {
 
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, new Runnable() {
             public void run() {
-                manager.resetRequests();
+                manager.setEnabled(false);
             }
         }, timeUntilMorning, DAY_LENGTH);
     }

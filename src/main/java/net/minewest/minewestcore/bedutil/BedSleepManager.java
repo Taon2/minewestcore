@@ -16,10 +16,20 @@ public class BedSleepManager {
     private static final int MINIMUM_ABSOLUTE_REQUESTS = 1;
 
     private Map<UUID, Boolean> requests = new HashMap<UUID, Boolean>();
+    private boolean sleepingEnabled = false;
+
+    public void setEnabled(boolean enabled) {
+        sleepingEnabled = enabled;
+        if (!enabled) {
+            resetRequests();
+        }
+    }
 
     public void castVote(UUID player, boolean accept) {
-        requests.put(player, accept);
-        checkRequired();
+        if (sleepingEnabled) {
+            requests.put(player, accept);
+            checkRequired();
+        }
     }
 
     public boolean hasVoted(UUID player) {
@@ -31,6 +41,10 @@ public class BedSleepManager {
         checkRequired();
     }
 
+    private void resetRequests() {
+        requests.clear();
+    }
+
     public int getRequests() {
         int acceptances = 0;
         for (UUID player : requests.keySet()) {
@@ -39,10 +53,6 @@ public class BedSleepManager {
             }
         }
         return acceptances;
-    }
-
-    public void resetRequests() {
-        requests.clear();
     }
 
     public int getNeededRequests() {
