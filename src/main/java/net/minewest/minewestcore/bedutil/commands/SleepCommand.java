@@ -17,6 +17,10 @@ public class SleepCommand implements CommandExecutor {
     }
 
     public boolean onCommand(final CommandSender commandSender, Command command, String s, String[] args) {
+        if (!(commandSender instanceof Player)) {
+            return false;
+        }
+
         final Player player = (Player) commandSender;
 
         if (args.length != 1) {
