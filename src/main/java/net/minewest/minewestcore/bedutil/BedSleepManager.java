@@ -1,31 +1,47 @@
 package net.minewest.minewestcore.bedutil;
 
-import net.minewest.minewestcore.bedutil.commands.SleepCommand;
+import net.minewest.minewestcore.MinewestCorePlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
 public class BedSleepManager {
 
     private static final float REQUIRED_PLAYER_RATIO = 0.5f;
 
-    private int requests = 0;
+    private Map<UUID, Boolean> requests = new HashMap<UUID, Boolean>();
 
-    public void increaseSleepRequest() {
-        requests++;
+    public void castVote(UUID player, boolean accept) {
+        requests.put(player, accept);
+        checkRequired();
     }
 
-    public void decreaseSleepRequest() {
-        requests--;
+    public boolean hasVoted(UUID player) {
+        return requests.containsKey(player);
     }
 
-    public void resetSleepRequests() {
-        requests = 0;
+    public void removePlayer(UUID player) {
+        requests.remove(player);
+        checkRequired();
     }
 
     public int getRequests() {
-        return requests;
+        int acceptances = 0;
+        for (UUID player : requests.keySet()) {
+            if (requests.get(player)) {
+                acceptances++;
+            }
+        }
+        return acceptances;
+    }
+
+    public void resetRequests() {
+        requests.clear();
     }
 
     public int getNeededRequests() {
@@ -59,8 +75,10 @@ public class BedSleepManager {
         return p.getWorld().equals(overworld);
     }
 
-    public void checkRequired() {
-        if (requests < getNeededRequests()) return;
+    private void checkRequired() {
+        if (getRequests() < getNeededRequests()) {
+            return;
+        }
 
         for (World world : Bukkit.getWorlds()) {
             if (!isDay(world)) {
@@ -72,15 +90,14 @@ public class BedSleepManager {
                 world.setStorm(false);
             }
         }
-        requests = 0;
         Bukkit.broadcastMessage(ChatColor.GOLD + "Requests met!");
-
-        SleepCommand.clearPlayers();
-        resetSleepRequests();
+        resetRequests();
     }
 
     public boolean isDay(World world) {
-        if (world == null) return false;
+        if (world == null) {
+            return false;
+        }
 
         long time = world.getTime();
 
@@ -88,7 +105,9 @@ public class BedSleepManager {
     }
 
     public boolean isThundering(World world) {
-        if (world == null) return false;
+        if (world == null) {
+            return false;
+        }
 
         boolean hasStorm = world.hasStorm();
         boolean isThundering = world.isThundering();

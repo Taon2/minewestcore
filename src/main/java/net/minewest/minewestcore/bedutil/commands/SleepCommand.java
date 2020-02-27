@@ -1,6 +1,5 @@
 package net.minewest.minewestcore.bedutil.commands;
 
-import net.minewest.minewestcore.MinewestCorePlugin;
 import net.minewest.minewestcore.bedutil.BedSleepManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -9,15 +8,9 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
-
 public class SleepCommand implements CommandExecutor {
 
     private BedSleepManager manager;
-    private static Set<UUID> players = new HashSet<UUID>();
 
     public SleepCommand(BedSleepManager manager) {
         this.manager = manager;
@@ -51,36 +44,23 @@ public class SleepCommand implements CommandExecutor {
             }
         }
 
-        if (players.contains(player.getUniqueId())) {
+        if (manager.hasVoted(player.getUniqueId())) {
             commandSender.sendMessage(ChatColor.RED + "You have already selected an option!");
             return true;
         }
 
+        manager.castVote(player.getUniqueId(), accept);
         if (accept) {
-            manager.increaseSleepRequest();
             Bukkit.broadcastMessage(ChatColor.WHITE + Integer.toString(manager.getRequests()) + "/" +
                     manager.getNeededRequests() + " " + ChatColor.GREEN + commandSender.getName() + " has accepted.");
         } else {
-            manager.decreaseSleepRequest();
             Bukkit.broadcastMessage(ChatColor.WHITE + Integer.toString(manager.getRequests()) + "/" +
                     manager.getNeededRequests() + " " + ChatColor.RED + commandSender.getName() + " has denied.");
         }
-
-        players.add(player.getUniqueId());
-        manager.checkRequired();
-
         return true;
     }
 
     private static void sendUsage(final CommandSender commandSender) {
         commandSender.sendMessage(ChatColor.WHITE + "Usage: " + ChatColor.RED + "/sleep [accept/deny]");
-    }
-
-    public static Collection<UUID> getPlayers() {
-        return players;
-    }
-
-    public static void clearPlayers() {
-        players.clear();
     }
 }
