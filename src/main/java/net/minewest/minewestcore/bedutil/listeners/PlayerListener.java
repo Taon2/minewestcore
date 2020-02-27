@@ -4,6 +4,7 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.minewest.minewestcore.MinewestCorePlugin;
+import net.minewest.minewestcore.bedutil.BedSleepManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -40,9 +41,10 @@ public class PlayerListener implements Listener {
             player.spigot().sendMessage(c);
         }
 
-        if (!MinewestCorePlugin.getInstance().getBedSleepManager().hasVoted(event.getPlayer().getUniqueId())) {
-            event.getPlayer().performCommand("sleep accept");
-        }
+        BedSleepManager manager = MinewestCorePlugin.getInstance().getBedSleepManager();
+
+        manager.setEnabled(true);
+        event.getPlayer().performCommand("sleep accept");
     }
 
     @EventHandler
