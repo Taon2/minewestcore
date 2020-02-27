@@ -15,14 +15,41 @@ public class BedSleepManager {
     private static final float REQUIRED_PLAYER_RATIO = 0.5f;
     private static final int MINIMUM_ABSOLUTE_REQUESTS = 1;
 
+    // See https://minecraft.gamepedia.com/Day-night_cycle
+    public static final int DAY_LENGTH = 24000;
+
+    // Time when using the `/time set day` command.
+    public static final int MORNING_START = 1000;
+
+    // 12542: In clear weather, beds can be used at this point.
+    public static final int BED_START = 12542;
+
+    // 23460: In clear weather, beds can no longer be used.
+    public static final int BED_END = 23460;
+
     private Map<UUID, Boolean> requests = new HashMap<UUID, Boolean>();
     private boolean sleepingEnabled = false;
+    private BukkitTask morningDisableTask;
 
     public void setEnabled(boolean enabled) {
         sleepingEnabled = enabled;
         if (!enabled) {
             resetRequests();
+    }
+    private void autoDisable() {
+        long currentTime = Bukkit.getWorld("world").getTime();
+        long timeUntilMorning = (DAY_LENGTH + MORNING_START - currentTime) % DAY_LENGTH;
+
+        if (morningDisableTask != null) {
+            morningDisableTask.cancel();
         }
+
+        morningDisableTask = Bukkit.getScheduler().runTaskTimerAsynchronously(MinewestCorePlugin.getInstance(), new Runnable() {
+            public void run() {
+                resetRequests();
+            }
+        }, timeUntilMorning, DAY_LENGTH);
+    }
     }
 
     public void castVote(UUID player, boolean accept) {
@@ -36,8 +63,12 @@ public class BedSleepManager {
         return requests.containsKey(player);
     }
 
-    public void removePlayer(UUID player) {
-        requests.remove(player);
+    public void updatePlayers() {
+        for (UUID player : requests.keySet()) {
+            if (!Bukkit.getOnlinePlayers().contains(player)) {
+                requests.remove(player);
+            }
+        }
         checkRequired();
     }
 
@@ -81,9 +112,11 @@ public class BedSleepManager {
             return;
         }
 
+
         for (World world : Bukkit.getWorlds()) {
             if (!isDay(world)) {
                 world.setTime(MinewestCorePlugin.MORNING_START);
+                world.setTime(MORNING_START);
             }
 
             if (isThundering(world)) {
@@ -91,6 +124,7 @@ public class BedSleepManager {
                 world.setStorm(false);
             }
         }
+
         Bukkit.broadcastMessage(ChatColor.GOLD + "Requests met!");
         resetRequests();
     }
@@ -103,6 +137,7 @@ public class BedSleepManager {
         long time = world.getTime();
 
         return time < MinewestCorePlugin.BED_START || time >= MinewestCorePlugin.BED_END;
+        return time < BED_START || time >= BED_END;
     }
 
     public boolean isThundering(World world) {
