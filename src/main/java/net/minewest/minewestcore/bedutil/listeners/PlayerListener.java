@@ -43,12 +43,12 @@ public class PlayerListener implements Listener {
 
         BedSleepManager manager = MinewestCorePlugin.getInstance().getBedSleepManager();
 
-        manager.setEnabled(true);
+        manager.setEnabled(event.getPlayer().getUniqueId());
         event.getPlayer().performCommand("sleep accept");
     }
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
-        MinewestCorePlugin.getInstance().getBedSleepManager().removePlayer(event.getPlayer().getUniqueId());
+        MinewestCorePlugin.getInstance().getBedSleepManager().updatePlayers();
     }
 }
