@@ -3,7 +3,7 @@ package net.minewest.minewestcore.bedutil.listeners;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.minewest.minewestcore.bedutil.commands.SleepCommand;
+import net.minewest.minewestcore.MinewestCorePlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -39,7 +39,7 @@ public class PlayerListener implements Listener {
             player.spigot().sendMessage(c);
         }
 
-        if (!SleepCommand.getPlayers().contains(event.getPlayer().getUniqueId())) {
+        if (!MinewestCorePlugin.getInstance().getBedSleepManager().hasVoted(event.getPlayer().getUniqueId())) {
             event.getPlayer().performCommand("sleep accept");
         }
     }
