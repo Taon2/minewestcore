@@ -6,7 +6,7 @@
 
     <groupId>net.minewest</groupId>
     <artifactId>MinewestCore</artifactId>
-    <version>1.0.3-SNAPSHOT</version>
+    <version>1.0.4-SNAPSHOT</version>
 
     <repositories>
         <repository>
