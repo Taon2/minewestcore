@@ -13,6 +13,7 @@ import java.util.UUID;
 public class BedSleepManager {
 
     private static final float REQUIRED_PLAYER_RATIO = 0.5f;
+    private static final int MINIMUM_ABSOLUTE_REQUESTS = 1;
 
     private Map<UUID, Boolean> requests = new HashMap<UUID, Boolean>();
 
@@ -45,18 +46,8 @@ public class BedSleepManager {
     }
 
     public int getNeededRequests() {
-
-        if (Bukkit.getOnlinePlayers().size() == 1) {
-            return 1;
-        }
-
         int needed = (int) (REQUIRED_PLAYER_RATIO * getValidPlayers());
-
-        if (needed == 0) {
-            return 1;
-        }
-
-        return needed;
+        return Math.max(needed, MINIMUM_ABSOLUTE_REQUESTS);
     }
 
     private int getValidPlayers() {
