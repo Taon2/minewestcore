@@ -15,31 +15,62 @@ import java.util.UUID;
 
 public class BedSleepManager {
 
-    private static final float REQUIRED_PLAYER_RATIO = 0.5f;
-    private static final int MINIMUM_ABSOLUTE_REQUESTS = 1;
-
     // See https://minecraft.gamepedia.com/Day-night_cycle
     public static final int DAY_LENGTH = 24000;
-
     // Time when using the `/time set day` command.
     public static final int MORNING_START = 1000;
-
     // 12542: In clear weather, beds can be used at this point.
     public static final int BED_START = 12542;
-
     // 23460: In clear weather, beds can no longer be used.
     public static final int BED_END = 23460;
+
+    private static final float REQUIRED_PLAYER_RATIO = 0.5f;
+    private static final int MINIMUM_ABSOLUTE_REQUESTS = 1;
 
     private Map<UUID, Boolean> requests = new HashMap<UUID, Boolean>();
     private Set<UUID> sleepingPlayers = new HashSet<UUID>();
 
     private BukkitTask morningDisableTask;
 
-    public void setEnabled(UUID enablingPlayer) {
-        sleepingPlayers.add(enablingPlayer);
-        if (getEnabled()) {
-            autoDisable();
+    public static boolean isDay(World world) {
+        if (world == null) {
+            return false;
         }
+
+        long time = world.getTime();
+
+        return time < BED_START || time >= BED_END;
+    }
+
+    public static boolean isThundering(World world) {
+        if (world == null) {
+            return false;
+        }
+
+        boolean hasStorm = world.hasStorm();
+        boolean isThundering = world.isThundering();
+        return (hasStorm && isThundering);
+    }
+
+    public static boolean isValidPlayer(Player p) {
+        World overworld = Bukkit.getWorld("world");
+        return p.getWorld().equals(overworld);
+    }
+
+    private static int getValidPlayers() {
+        int validPlayers = 0;
+
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            if (isValidPlayer(p)) {
+                validPlayers++;
+            }
+        }
+        return validPlayers;
+    }
+
+    public static int getNeededRequests() {
+        int needed = (int) (REQUIRED_PLAYER_RATIO * getValidPlayers());
+        return Math.max(needed, MINIMUM_ABSOLUTE_REQUESTS);
     }
 
     private void autoDisable() {
@@ -61,6 +92,13 @@ public class BedSleepManager {
         return !sleepingPlayers.isEmpty();
     }
 
+    public void setEnabled(UUID enablingPlayer) {
+        sleepingPlayers.add(enablingPlayer);
+        if (getEnabled()) {
+            autoDisable();
+        }
+    }
+
     public void castVote(UUID player, boolean accept) {
         if (getEnabled()) {
             requests.put(player, accept);
@@ -72,11 +110,15 @@ public class BedSleepManager {
         return requests.containsKey(player);
     }
 
+    private void removePlayer(UUID player) {
+        requests.remove(player);
+        sleepingPlayers.remove(player);
+    }
+
     public void updatePlayers() {
         for (UUID player : requests.keySet()) {
             if (!Bukkit.getOnlinePlayers().contains(player)) {
-                requests.remove(player);
-                sleepingPlayers.remove(player);
+                removePlayer(player);
             }
         }
         checkRequired();
@@ -95,27 +137,6 @@ public class BedSleepManager {
             }
         }
         return acceptances;
-    }
-
-    public int getNeededRequests() {
-        int needed = (int) (REQUIRED_PLAYER_RATIO * getValidPlayers());
-        return Math.max(needed, MINIMUM_ABSOLUTE_REQUESTS);
-    }
-
-    private int getValidPlayers() {
-        int validPlayers = 0;
-
-        for (Player p : Bukkit.getOnlinePlayers()) {
-            if (isValidPlayer(p)) {
-                validPlayers++;
-            }
-        }
-        return validPlayers;
-    }
-
-    public boolean isValidPlayer(Player p) {
-        World overworld = Bukkit.getWorld("world");
-        return p.getWorld().equals(overworld);
     }
 
     private void checkRequired() {
@@ -137,25 +158,5 @@ public class BedSleepManager {
 
         Bukkit.broadcastMessage(ChatColor.GOLD + "Requests met!");
         resetRequests();
-    }
-
-    public boolean isDay(World world) {
-        if (world == null) {
-            return false;
-        }
-
-        long time = world.getTime();
-
-        return time < BED_START || time >= BED_END;
-    }
-
-    public boolean isThundering(World world) {
-        if (world == null) {
-            return false;
-        }
-
-        boolean hasStorm = world.hasStorm();
-        boolean isThundering = world.isThundering();
-        return (hasStorm && isThundering);
     }
 }
