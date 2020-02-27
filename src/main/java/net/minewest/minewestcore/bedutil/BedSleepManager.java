@@ -38,7 +38,6 @@ public class BedSleepManager {
     public void setEnabled(UUID enablingPlayer) {
         sleepingPlayers.add(enablingPlayer);
         if (getEnabled()) {
-            resetRequests();
             autoDisable();
         }
     }
