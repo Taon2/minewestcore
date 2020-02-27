@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerBedEnterEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 public class PlayerListener implements Listener {
 
@@ -42,5 +43,10 @@ public class PlayerListener implements Listener {
         if (!MinewestCorePlugin.getInstance().getBedSleepManager().hasVoted(event.getPlayer().getUniqueId())) {
             event.getPlayer().performCommand("sleep accept");
         }
+    }
+
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        MinewestCorePlugin.getInstance().getBedSleepManager().removePlayer(event.getPlayer().getUniqueId());
     }
 }
