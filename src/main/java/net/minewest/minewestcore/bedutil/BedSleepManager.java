@@ -64,7 +64,7 @@ public class BedSleepManager {
 
         for (World world : Bukkit.getWorlds()) {
             if (!isDay(world)) {
-                world.setTime(1000);
+                world.setTime(MinewestCorePlugin.MORNING_START);
             }
 
             if (isThundering(world)) {
@@ -84,7 +84,7 @@ public class BedSleepManager {
 
         long time = world.getTime();
 
-        return time < 12541 || time > 23458;
+        return time < MinewestCorePlugin.BED_START || time >= MinewestCorePlugin.BED_END;
     }
 
     public boolean isThundering(World world) {
