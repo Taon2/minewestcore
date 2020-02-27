@@ -5,9 +5,12 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.UUID;
 
 public class BedSleepManager {
@@ -28,14 +31,18 @@ public class BedSleepManager {
     public static final int BED_END = 23460;
 
     private Map<UUID, Boolean> requests = new HashMap<UUID, Boolean>();
-    private boolean sleepingEnabled = false;
+    private Set<UUID> sleepingPlayers = new HashSet<UUID>();
+
     private BukkitTask morningDisableTask;
 
-    public void setEnabled(boolean enabled) {
-        sleepingEnabled = enabled;
-        if (!enabled) {
+    public void setEnabled(UUID enablingPlayer) {
+        sleepingPlayers.add(enablingPlayer);
+        if (getEnabled()) {
             resetRequests();
+            autoDisable();
+        }
     }
+
     private void autoDisable() {
         long currentTime = Bukkit.getWorld("world").getTime();
         long timeUntilMorning = (DAY_LENGTH + MORNING_START - currentTime) % DAY_LENGTH;
@@ -50,10 +57,13 @@ public class BedSleepManager {
             }
         }, timeUntilMorning, DAY_LENGTH);
     }
+
+    private boolean getEnabled() {
+        return !sleepingPlayers.isEmpty();
     }
 
     public void castVote(UUID player, boolean accept) {
-        if (sleepingEnabled) {
+        if (getEnabled()) {
             requests.put(player, accept);
             checkRequired();
         }
@@ -67,12 +77,14 @@ public class BedSleepManager {
         for (UUID player : requests.keySet()) {
             if (!Bukkit.getOnlinePlayers().contains(player)) {
                 requests.remove(player);
+                sleepingPlayers.remove(player);
             }
         }
         checkRequired();
     }
 
     private void resetRequests() {
+        sleepingPlayers.clear();
         requests.clear();
     }
 
@@ -108,14 +120,13 @@ public class BedSleepManager {
     }
 
     private void checkRequired() {
-        if (getRequests() < getNeededRequests()) {
+        if (!getEnabled() || getRequests() < getNeededRequests()) {
             return;
         }
 
 
         for (World world : Bukkit.getWorlds()) {
             if (!isDay(world)) {
-                world.setTime(MinewestCorePlugin.MORNING_START);
                 world.setTime(MORNING_START);
             }
 
@@ -136,7 +147,6 @@ public class BedSleepManager {
 
         long time = world.getTime();
 
-        return time < MinewestCorePlugin.BED_START || time >= MinewestCorePlugin.BED_END;
         return time < BED_START || time >= BED_END;
     }
 
