@@ -41,7 +41,7 @@ public class SleepCommand implements CommandExecutor {
         }
 
         if (!BedSleepManager.isValidPlayer(player)) {
-            commandSender.sendMessage(ChatColor.RED + "You can are not in an appropriate world!");
+            commandSender.sendMessage(ChatColor.RED + "You are not in an appropriate world!");
             return true;
         }
 
@@ -50,6 +50,11 @@ public class SleepCommand implements CommandExecutor {
                 commandSender.sendMessage(ChatColor.RED + "You can only do this at night or during a thunderstorm!");
                 return true;
             }
+        }
+
+        if (!manager.getEnabled()) {
+            commandSender.sendMessage(ChatColor.RED + "Nobody has requested to sleep yet!");
+            return true;
         }
 
         if (manager.hasVoted(player.getUniqueId())) {
@@ -65,6 +70,8 @@ public class SleepCommand implements CommandExecutor {
             Bukkit.broadcastMessage(ChatColor.WHITE + Integer.toString(manager.getRequests()) + "/" +
                     BedSleepManager.getNeededRequests() + " " + ChatColor.RED + commandSender.getName() + " has denied.");
         }
+
+        manager.checkRequired();
         return true;
     }
 }

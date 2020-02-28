@@ -92,7 +92,7 @@ public class BedSleepManager {
         }
     }
 
-    private boolean getEnabled() {
+    public boolean getEnabled() {
         return !sleepingPlayers.isEmpty();
     }
 
@@ -108,7 +108,6 @@ public class BedSleepManager {
     public void castVote(UUID player, boolean accept) {
         if (getEnabled()) {
             requests.put(player, accept);
-            checkRequired();
         }
     }
 
@@ -123,7 +122,7 @@ public class BedSleepManager {
 
     public void updatePlayers() {
         for (UUID player : requests.keySet()) {
-            if (!Bukkit.getOnlinePlayers().contains(player)) {
+            if (!Bukkit.getOfflinePlayer(player).isOnline()) {
                 removePlayer(player);
             }
         }
@@ -145,7 +144,7 @@ public class BedSleepManager {
         return acceptances;
     }
 
-    private void checkRequired() {
+    public void checkRequired() {
         if (!getEnabled() || getRequests() < getNeededRequests()) {
             return;
         }
