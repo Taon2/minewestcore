@@ -16,6 +16,10 @@ public class SleepCommand implements CommandExecutor {
         this.manager = manager;
     }
 
+    private static void sendUsage(final CommandSender commandSender) {
+        commandSender.sendMessage(ChatColor.WHITE + "Usage: " + ChatColor.RED + "/sleep [accept/deny]");
+    }
+
     public boolean onCommand(final CommandSender commandSender, Command command, String s, String[] args) {
         if (!(commandSender instanceof Player)) {
             return false;
@@ -36,13 +40,13 @@ public class SleepCommand implements CommandExecutor {
             return false;
         }
 
-        if (!manager.isValidPlayer(player)) {
+        if (!BedSleepManager.isValidPlayer(player)) {
             commandSender.sendMessage(ChatColor.RED + "You can are not in an appropriate world!");
             return true;
         }
 
-        if (manager.isDay(player.getWorld())) {
-            if (!manager.isThundering(player.getWorld())) {
+        if (BedSleepManager.isDay(player.getWorld())) {
+            if (!BedSleepManager.isThundering(player.getWorld())) {
                 commandSender.sendMessage(ChatColor.RED + "You can only do this at night or during a thunderstorm!");
                 return true;
             }
@@ -56,15 +60,11 @@ public class SleepCommand implements CommandExecutor {
         manager.castVote(player.getUniqueId(), accept);
         if (accept) {
             Bukkit.broadcastMessage(ChatColor.WHITE + Integer.toString(manager.getRequests()) + "/" +
-                    manager.getNeededRequests() + " " + ChatColor.GREEN + commandSender.getName() + " has accepted.");
+                    BedSleepManager.getNeededRequests() + " " + ChatColor.GREEN + commandSender.getName() + " has accepted.");
         } else {
             Bukkit.broadcastMessage(ChatColor.WHITE + Integer.toString(manager.getRequests()) + "/" +
-                    manager.getNeededRequests() + " " + ChatColor.RED + commandSender.getName() + " has denied.");
+                    BedSleepManager.getNeededRequests() + " " + ChatColor.RED + commandSender.getName() + " has denied.");
         }
         return true;
-    }
-
-    private static void sendUsage(final CommandSender commandSender) {
-        commandSender.sendMessage(ChatColor.WHITE + "Usage: " + ChatColor.RED + "/sleep [accept/deny]");
     }
 }
