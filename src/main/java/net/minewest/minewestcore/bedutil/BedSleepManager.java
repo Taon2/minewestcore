@@ -7,11 +7,7 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.UUID;
+import java.util.*;
 
 public class BedSleepManager {
 
@@ -31,6 +27,12 @@ public class BedSleepManager {
     private Set<UUID> sleepingPlayers = new HashSet<UUID>();
 
     private BukkitTask morningDisableTask;
+
+    private MinewestCorePlugin plugin;
+
+    public BedSleepManager(MinewestCorePlugin plugin) {
+        this.plugin = plugin;
+    }
 
     public static boolean isDay(World world) {
         if (world == null) {
@@ -79,7 +81,7 @@ public class BedSleepManager {
 
         cancelDisable();
 
-        morningDisableTask = Bukkit.getScheduler().runTaskTimerAsynchronously(MinewestCorePlugin.getInstance(), new Runnable() {
+        morningDisableTask = Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, new Runnable() {
             public void run() {
                 resetRequests();
             }
