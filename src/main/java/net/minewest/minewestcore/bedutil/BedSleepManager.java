@@ -108,6 +108,7 @@ public class BedSleepManager {
     public void castVote(UUID player, boolean accept) {
         if (getEnabled()) {
             requests.put(player, accept);
+            checkRequired();
         }
     }
 
@@ -144,7 +145,7 @@ public class BedSleepManager {
         return acceptances;
     }
 
-    public void checkRequired() {
+    private void checkRequired() {
         if (!getEnabled() || getRequests() < getNeededRequests()) {
             return;
         }
