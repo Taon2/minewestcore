@@ -2,7 +2,6 @@ package net.minewest.minewestcore.bedutil;
 
 import net.minewest.minewestcore.MinewestCorePlugin;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
@@ -111,10 +110,12 @@ public class BedSleepManager {
         }
     }
 
-    public void castVote(UUID player, boolean accept) {
+    public boolean castVote(UUID player, boolean accept) {
         if (getEnabled()) {
             requests.put(player, accept);
+            return checkRequired();
         }
+        return false;
     }
 
     public boolean hasVoted(UUID player) {
@@ -150,9 +151,9 @@ public class BedSleepManager {
         return acceptances;
     }
 
-    public void checkRequired() {
+    private boolean checkRequired() {
         if (!getEnabled() || getRequests() < getNeededRequests()) {
-            return;
+            return false;
         }
 
 
@@ -167,8 +168,8 @@ public class BedSleepManager {
             }
         }
 
-        Bukkit.broadcastMessage(ChatColor.GOLD + "Requests met!");
         resetRequests();
         cancelDisable();
+        return true;
     }
 }
