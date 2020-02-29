@@ -14,6 +14,11 @@ public class SleepCommand implements CommandExecutor {
 
     public SleepCommand(BedSleepManager manager) {
         this.manager = manager;
+        manager.setOnSuccess(new Runnable() {
+            public void run() {
+                Bukkit.broadcastMessage(ChatColor.GOLD + "Requests met!");
+            }
+        });
     }
 
     public boolean onCommand(final CommandSender commandSender, Command command, String s, String[] args) {
@@ -56,17 +61,13 @@ public class SleepCommand implements CommandExecutor {
             return true;
         }
 
-        boolean requestsMet = manager.castVote(player.getUniqueId(), accept);
+        manager.castVote(player.getUniqueId(), accept);
         if (accept) {
             Bukkit.broadcastMessage(ChatColor.WHITE + Integer.toString(manager.getRequests()) + "/" +
                     BedSleepManager.getNeededRequests() + " " + ChatColor.GREEN + commandSender.getName() + " has accepted.");
         } else {
             Bukkit.broadcastMessage(ChatColor.WHITE + Integer.toString(manager.getRequests()) + "/" +
                     BedSleepManager.getNeededRequests() + " " + ChatColor.RED + commandSender.getName() + " has denied.");
-        }
-
-        if (requestsMet) {
-            Bukkit.broadcastMessage(ChatColor.GOLD + "Requests met!");
         }
 
         return true;
