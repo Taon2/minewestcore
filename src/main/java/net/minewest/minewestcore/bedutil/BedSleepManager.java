@@ -33,6 +33,8 @@ public class BedSleepManager {
 
     private MinewestCorePlugin plugin;
 
+    private Runnable onSuccess;
+
     public BedSleepManager(MinewestCorePlugin plugin) {
         this.plugin = plugin;
     }
@@ -97,6 +99,10 @@ public class BedSleepManager {
         }
     }
 
+    public void setOnSuccess(Runnable onSuccess) {
+        this.onSuccess = onSuccess;
+    }
+
     public boolean getEnabled() {
         return !sleepingPlayers.isEmpty();
     }
@@ -110,12 +116,11 @@ public class BedSleepManager {
         }
     }
 
-    public boolean castVote(UUID player, boolean accept) {
+    public void castVote(UUID player, boolean accept) {
         if (getEnabled()) {
             requests.put(player, accept);
-            return checkRequired();
+            checkRequired();
         }
-        return false;
     }
 
     public boolean hasVoted(UUID player) {
@@ -166,6 +171,10 @@ public class BedSleepManager {
                 world.setThundering(false);
                 world.setStorm(false);
             }
+        }
+
+        if (onSuccess != null) {
+            onSuccess.run();
         }
 
         resetRequests();
