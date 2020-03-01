@@ -110,12 +110,11 @@ public class BedSleepManager {
         }
     }
 
-    public boolean castVote(UUID player, boolean accept) {
+    public boolean castVote(UUID player, boolean accept, Runnable onSuccess) {
         if (getEnabled()) {
             requests.put(player, accept);
-            return checkRequired();
         }
-        return false;
+        return checkRequired(onSuccess);
     }
 
     public boolean hasVoted(UUID player) {
@@ -133,7 +132,7 @@ public class BedSleepManager {
                 removePlayer(player);
             }
         }
-        checkRequired();
+        checkRequired(null);
     }
 
     private void resetRequests() {
@@ -151,11 +150,10 @@ public class BedSleepManager {
         return acceptances;
     }
 
-    private boolean checkRequired() {
+    private boolean checkRequired(Runnable onSuccess) {
         if (!getEnabled() || getRequests() < getNeededRequests()) {
             return false;
         }
-
 
         for (World world : Bukkit.getWorlds()) {
             if (!isDay(world)) {
@@ -166,6 +164,10 @@ public class BedSleepManager {
                 world.setThundering(false);
                 world.setStorm(false);
             }
+        }
+
+        if (onSuccess != null) {
+            onSuccess.run();
         }
 
         resetRequests();
