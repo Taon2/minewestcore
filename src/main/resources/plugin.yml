@@ -5,4 +5,4 @@ version: 1.0.8
 commands:
   sleep:
     description: Accepts or denies a request to sleep.
-    usage: /sleep [accept|deny]
+    usage: "Usage: /sleep [accept|deny]"
