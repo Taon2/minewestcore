@@ -110,11 +110,11 @@ public class BedSleepManager {
         }
     }
 
-    public boolean castVote(UUID player, boolean accept, Runnable onSuccess) {
+    public boolean castVote(UUID player, boolean accept, Runnable messageRunnable) {
         if (getEnabled()) {
             requests.put(player, accept);
         }
-        return checkRequired(onSuccess);
+        return checkRequired(messageRunnable);
     }
 
     public boolean hasVoted(UUID player) {
@@ -150,7 +150,11 @@ public class BedSleepManager {
         return acceptances;
     }
 
-    private boolean checkRequired(Runnable onSuccess) {
+    private boolean checkRequired(Runnable messageRunnable) {
+        if (messageRunnable != null) {
+            messageRunnable.run();
+        }
+
         if (!getEnabled() || getRequests() < getNeededRequests()) {
             return false;
         }
@@ -164,10 +168,6 @@ public class BedSleepManager {
                 world.setThundering(false);
                 world.setStorm(false);
             }
-        }
-
-        if (onSuccess != null) {
-            onSuccess.run();
         }
 
         resetRequests();
