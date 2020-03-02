@@ -56,24 +56,24 @@ public class SleepCommand implements CommandExecutor {
             return true;
         }
 
-        Runnable onSuccess;
+        Runnable messageRunnable;
 
         if (accept) {
-            onSuccess = new Runnable() {
+            messageRunnable = new Runnable() {
                 public void run() {
                     Bukkit.broadcastMessage(ChatColor.WHITE + Integer.toString(manager.getRequests()) + "/" +
                             BedSleepManager.getNeededRequests() + " " + ChatColor.GREEN + commandSender.getName() + " has accepted.");
                 }
             };
         } else {
-            onSuccess = new Runnable() {
+            messageRunnable = new Runnable() {
                 public void run() {
                     Bukkit.broadcastMessage(ChatColor.WHITE + Integer.toString(manager.getRequests()) + "/" +
                             BedSleepManager.getNeededRequests() + " " + ChatColor.RED + commandSender.getName() + " has denied.");
                 }
             };
         }
-        boolean requestsMet = manager.castVote(player.getUniqueId(), accept, onSuccess);
+        boolean requestsMet = manager.castVote(player.getUniqueId(), accept, messageRunnable);
 
         if (requestsMet) {
             Bukkit.broadcastMessage(ChatColor.GOLD + "Requests met!");
