@@ -145,6 +145,8 @@ public class BedSleepManager {
         for (UUID player : requests.keySet()) {
             if (requests.get(player)) {
                 acceptances++;
+            } else {
+                acceptances--;
             }
         }
         return acceptances;
