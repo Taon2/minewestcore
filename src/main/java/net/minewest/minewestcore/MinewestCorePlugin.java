@@ -18,6 +18,8 @@ public class MinewestCorePlugin extends JavaPlugin {
         manager = new BedSleepManager(this);
 
         this.getCommand("sleep").setExecutor(new SleepCommand(manager));
+        this.getCommand("afk").setExecutor(manager.getAFKManager().getAFKCommand());
+        this.getCommand("getafk").setExecutor(manager.getAFKManager().getGetAFKCommand());
 
         Bukkit.getPluginManager().registerEvents(new PlayerListener(manager), this);
     }

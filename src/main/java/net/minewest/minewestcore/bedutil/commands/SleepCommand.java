@@ -34,7 +34,7 @@ public class SleepCommand implements CommandExecutor {
             return false;
         }
 
-        if (!BedSleepManager.isValidPlayer(player)) {
+        if (!manager.isValidPlayer(player)) {
             commandSender.sendMessage(ChatColor.RED + "You are not in an appropriate world!");
             return true;
         }
@@ -58,10 +58,10 @@ public class SleepCommand implements CommandExecutor {
 
         if (accept) {
             Bukkit.broadcastMessage(ChatColor.WHITE + Integer.toString(manager.getRequests()) + "/" +
-                    BedSleepManager.getNeededRequests() + " " + ChatColor.GREEN + commandSender.getName() + " has accepted.");
+                    manager.getNeededRequests() + " " + ChatColor.GREEN + commandSender.getName() + " has accepted.");
         } else {
             Bukkit.broadcastMessage(ChatColor.WHITE + Integer.toString(manager.getRequests()) + "/" +
-                    BedSleepManager.getNeededRequests() + " " + ChatColor.RED + commandSender.getName() + " has denied.");
+                    manager.getNeededRequests() + " " + ChatColor.RED + commandSender.getName() + " has denied.");
         }
         manager.castVote(player.getUniqueId(), accept);
 

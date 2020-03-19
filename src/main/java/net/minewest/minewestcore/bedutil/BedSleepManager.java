@@ -1,6 +1,7 @@
 package net.minewest.minewestcore.bedutil;
 
 import net.minewest.minewestcore.MinewestCorePlugin;
+import net.minewest.minewestcore.afk.AFKManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Statistic;
@@ -34,9 +35,11 @@ public class BedSleepManager {
     private BukkitTask morningDisableTask;
 
     private MinewestCorePlugin plugin;
+    private AFKManager AFKManager;
 
     public BedSleepManager(MinewestCorePlugin plugin) {
         this.plugin = plugin;
+        AFKManager = new AFKManager();
     }
 
     public static boolean isDay(World world) {
@@ -59,29 +62,31 @@ public class BedSleepManager {
         return (hasStorm && isThundering);
     }
 
-    public static boolean isValidPlayer(Player p) {
-        World overworld = Bukkit.getWorld("world");
-        return p.getWorld().equals(overworld);
+    private static void resetInsomnia(Player player) {
+        player.setStatistic(Statistic.TIME_SINCE_REST, 0);
     }
 
-    private static int getValidPlayers() {
+    public int getNeededRequests() {
+        int needed = (int) (REQUIRED_PLAYER_RATIO * getValidPlayers());
+        return Math.max(needed, MINIMUM_ABSOLUTE_REQUESTS);
+    }
+
+    private int getValidPlayers() {
         int validPlayers = 0;
 
-        for (Player p : Bukkit.getOnlinePlayers()) {
-            if (isValidPlayer(p)) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (isValidPlayer(player)) {
                 validPlayers++;
             }
         }
         return validPlayers;
     }
 
-    public static int getNeededRequests() {
-        int needed = (int) (REQUIRED_PLAYER_RATIO * getValidPlayers());
-        return Math.max(needed, MINIMUM_ABSOLUTE_REQUESTS);
-    }
-
-    private static void resetInsomnia(Player player) {
-        player.setStatistic(Statistic.TIME_SINCE_REST, 0);
+    public boolean isValidPlayer(Player player) {
+        World overworld = Bukkit.getWorld("world");
+        boolean valid = player.getWorld().equals(overworld);
+        valid &= !AFKManager.isAFK(player.getUniqueId());
+        return valid;
     }
 
     private void autoDisable() {
@@ -136,6 +141,7 @@ public class BedSleepManager {
         for (UUID player : requests.keySet()) {
             if (!Bukkit.getOfflinePlayer(player).isOnline()) {
                 removePlayer(player);
+                AFKManager.setAFK(player, false);
             }
         }
         checkRequired();
@@ -184,4 +190,9 @@ public class BedSleepManager {
         resetRequests();
         cancelDisable();
     }
+
+    public AFKManager getAFKManager() {
+        return AFKManager;
+    }
+
 }

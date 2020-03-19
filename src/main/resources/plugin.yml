@@ -6,3 +6,9 @@ commands:
   sleep:
     description: Accepts or denies a request to sleep.
     usage: /sleep [accept|deny]
+  afk:
+    description: Toggles AFK status for each player
+    usage: /afk
+  getafk:
+    description: Gets AFK status for each player
+    usage: /getafk
