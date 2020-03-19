@@ -73,6 +73,10 @@ public class BedSleepManager {
         return Math.max(needed, MINIMUM_ABSOLUTE_REQUESTS);
     }
 
+    private static void resetInsomnia(Player player) {
+        player.setStatistic(Statistic.TIME_SINCE_REST, 0);
+    }
+
     private void autoDisable() {
         long currentTime = Bukkit.getWorld("world").getTime();
         long timeUntilMorning = (DAY_LENGTH + MORNING_START - currentTime) % DAY_LENGTH;
@@ -161,6 +165,12 @@ public class BedSleepManager {
             if (isThundering(world)) {
                 world.setThundering(false);
                 world.setStorm(false);
+            }
+        }
+
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (isValidPlayer(player)) {
+                resetInsomnia(player);
             }
         }
 
