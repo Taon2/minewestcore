@@ -3,14 +3,15 @@ package net.minewest.minewestcore.bedutil;
 import net.minewest.minewestcore.MinewestCorePlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Statistic;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.HashSet;
 import java.util.UUID;
 
 public class BedSleepManager {
@@ -31,6 +32,12 @@ public class BedSleepManager {
     private Set<UUID> sleepingPlayers = new HashSet<UUID>();
 
     private BukkitTask morningDisableTask;
+
+    private MinewestCorePlugin plugin;
+
+    public BedSleepManager(MinewestCorePlugin plugin) {
+        this.plugin = plugin;
+    }
 
     public static boolean isDay(World world) {
         if (world == null) {
@@ -83,7 +90,7 @@ public class BedSleepManager {
 
         cancelDisable();
 
-        morningDisableTask = Bukkit.getScheduler().runTaskTimerAsynchronously(MinewestCorePlugin.getInstance(), new Runnable() {
+        morningDisableTask = Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, new Runnable() {
             public void run() {
                 resetRequests();
             }
@@ -155,7 +162,6 @@ public class BedSleepManager {
         if (!getEnabled() || getRequests() < getNeededRequests()) {
             return;
         }
-
 
         for (World world : Bukkit.getWorlds()) {
             if (!isDay(world)) {
