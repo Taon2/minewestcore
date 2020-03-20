@@ -6,6 +6,7 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -121,17 +122,21 @@ public class BedSleepManager {
         return requests.containsKey(player);
     }
 
-    private void removePlayer(UUID player) {
-        requests.remove(player);
-        sleepingPlayers.remove(player);
+    private void removePlayers(Collection<UUID> toRemove) {
+        for (UUID player : toRemove) {
+            requests.remove(player);
+            sleepingPlayers.remove(player);
+        }
     }
 
     public void updatePlayers() {
+        Set<UUID> toRemove = new HashSet<UUID>();
         for (UUID player : requests.keySet()) {
             if (!Bukkit.getOfflinePlayer(player).isOnline()) {
-                removePlayer(player);
+                toRemove.add(player);
             }
         }
+        removePlayers(toRemove);
         checkRequired(null);
     }
 
