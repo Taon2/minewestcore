@@ -2,6 +2,7 @@ package net.minewest.minewestcore.bedutil;
 
 import net.minewest.minewestcore.MinewestCorePlugin;
 import org.bukkit.Bukkit;
+import org.bukkit.Statistic;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
@@ -77,6 +78,10 @@ public class BedSleepManager {
     public static int getNeededRequests() {
         int needed = (int) (REQUIRED_PLAYER_RATIO * getValidPlayers());
         return Math.max(needed, MINIMUM_ABSOLUTE_REQUESTS);
+    }
+
+    private static void resetInsomnia(Player player) {
+        player.setStatistic(Statistic.TIME_SINCE_REST, 0);
     }
 
     private void autoDisable() {
@@ -174,6 +179,12 @@ public class BedSleepManager {
             if (isThundering(world)) {
                 world.setThundering(false);
                 world.setStorm(false);
+            }
+        }
+
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (isValidPlayer(player)) {
+                resetInsomnia(player);
             }
         }
 
