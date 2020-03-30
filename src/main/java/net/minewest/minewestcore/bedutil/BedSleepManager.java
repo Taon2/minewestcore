@@ -1,6 +1,7 @@
 package net.minewest.minewestcore.bedutil;
 
 import net.minewest.minewestcore.MinewestCorePlugin;
+import net.minewest.minewestcore.afkutil.InactiveManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Statistic;
 import org.bukkit.World;
@@ -34,9 +35,11 @@ public class BedSleepManager {
     private BukkitTask morningDisableTask;
 
     private MinewestCorePlugin plugin;
+    private InactiveManager inactiveManager;
 
-    public BedSleepManager(MinewestCorePlugin plugin) {
+    public BedSleepManager(MinewestCorePlugin plugin, InactiveManager inactiveManager) {
         this.plugin = plugin;
+        this.inactiveManager = inactiveManager;
     }
 
     public static boolean isDay(World world) {
@@ -59,25 +62,31 @@ public class BedSleepManager {
         return (hasStorm && isThundering);
     }
 
-    public static boolean isValidPlayer(Player p) {
-        World overworld = Bukkit.getWorld("world");
-        return p.getWorld().equals(overworld);
+    private static void resetInsomnia(Player player) {
+        player.setStatistic(Statistic.TIME_SINCE_REST, 0);
     }
 
-    private static int getValidPlayers() {
+    public int getNeededRequests() {
+        int needed = (int) (REQUIRED_PLAYER_RATIO * getValidPlayers());
+        return Math.max(needed, MINIMUM_ABSOLUTE_REQUESTS);
+    }
+
+    private int getValidPlayers() {
         int validPlayers = 0;
 
-        for (Player p : Bukkit.getOnlinePlayers()) {
-            if (isValidPlayer(p)) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (isValidPlayer(player)) {
                 validPlayers++;
             }
         }
         return validPlayers;
     }
 
-    public static int getNeededRequests() {
-        int needed = (int) (REQUIRED_PLAYER_RATIO * getValidPlayers());
-        return Math.max(needed, MINIMUM_ABSOLUTE_REQUESTS);
+    public boolean isValidPlayer(Player player) {
+        World overworld = Bukkit.getWorld("world");
+        boolean valid = player.getWorld().equals(overworld);
+        valid &= !inactiveManager.isInactive(player.getUniqueId());
+        return valid;
     }
 
     private static void resetInsomnia(Player player) {
