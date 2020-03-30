@@ -1,7 +1,7 @@
 name: MinewestCore
 main: net.minewest.minewestcore.MinewestCorePlugin
 authors: [Taon2, spencrr]
-version: 1.1.0
+version: 1.1.1
 commands:
   sleep:
     description: Accepts or denies a request to sleep.
