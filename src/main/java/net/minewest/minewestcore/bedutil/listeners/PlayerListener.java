@@ -46,7 +46,6 @@ public class PlayerListener implements Listener {
             player.spigot().sendMessage(c);
         }
 
-
         manager.setEnabled(event.getPlayer().getUniqueId());
         event.getPlayer().performCommand("sleep accept");
     }
