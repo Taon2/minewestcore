@@ -2,10 +2,12 @@ package net.minewest.minewestcore.bedutil;
 
 import net.minewest.minewestcore.MinewestCorePlugin;
 import org.bukkit.Bukkit;
+import org.bukkit.Statistic;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -78,6 +80,10 @@ public class BedSleepManager {
         return Math.max(needed, MINIMUM_ABSOLUTE_REQUESTS);
     }
 
+    private static void resetInsomnia(Player player) {
+        player.setStatistic(Statistic.TIME_SINCE_REST, 0);
+    }
+
     private void autoDisable() {
         long currentTime = Bukkit.getWorld("world").getTime();
         long timeUntilMorning = (DAY_LENGTH + MORNING_START - currentTime) % DAY_LENGTH;
@@ -121,17 +127,21 @@ public class BedSleepManager {
         return requests.containsKey(player);
     }
 
-    private void removePlayer(UUID player) {
-        requests.remove(player);
-        sleepingPlayers.remove(player);
+    private void removePlayers(Collection<UUID> toRemove) {
+        for (UUID player : toRemove) {
+            requests.remove(player);
+            sleepingPlayers.remove(player);
+        }
     }
 
     public void updatePlayers() {
+        Set<UUID> toRemove = new HashSet<UUID>();
         for (UUID player : requests.keySet()) {
             if (!Bukkit.getOfflinePlayer(player).isOnline()) {
-                removePlayer(player);
+                toRemove.add(player);
             }
         }
+        removePlayers(toRemove);
         checkRequired(null);
     }
 
@@ -169,6 +179,12 @@ public class BedSleepManager {
             if (isThundering(world)) {
                 world.setThundering(false);
                 world.setStorm(false);
+            }
+        }
+
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (isValidPlayer(player)) {
+                resetInsomnia(player);
             }
         }
 
