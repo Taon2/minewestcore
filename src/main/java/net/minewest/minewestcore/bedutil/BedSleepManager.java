@@ -66,6 +66,11 @@ public class BedSleepManager {
         player.setStatistic(Statistic.TIME_SINCE_REST, 0);
     }
 
+    public static boolean isInValidWorld(Player player) {
+        World overworld = Bukkit.getWorld("world");
+        return player.getWorld().equals(overworld);
+    }
+
     public int getNeededRequests() {
         int needed = (int) (REQUIRED_PLAYER_RATIO * getValidPlayers());
         return Math.max(needed, MINIMUM_ABSOLUTE_REQUESTS);
@@ -82,11 +87,14 @@ public class BedSleepManager {
         return validPlayers;
     }
 
-    public boolean isValidPlayer(Player player) {
-        World overworld = Bukkit.getWorld("world");
-        boolean valid = player.getWorld().equals(overworld);
-        valid &= !inactiveManager.isInactive(player.getUniqueId());
+    private boolean isValidPlayer(Player player) {
+        boolean valid = isInValidWorld(player);
+        valid &= !isInactive(player);
         return valid;
+    }
+
+    public boolean isInactive(Player player) {
+        return inactiveManager.isInactive(player.getUniqueId());
     }
 
     private void autoDisable() {
