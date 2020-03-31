@@ -41,13 +41,11 @@ public class InactiveDetectListener implements Listener {
         setInactive = Bukkit.getScheduler().runTaskLater(this.plugin, new Runnable() {
             @Override
             public void run() {
-                System.out.println("task run");
                 if (!InactiveDetectListener.this.inactiveManager.isInactive(uuid)) {
                     player.performCommand("afk");
                 }
             }
         }, TICKS_TO_INACTIVE);
-        System.out.println("task set");
         this.setInactiveTasks.put(uuid, setInactive);
     }
 
