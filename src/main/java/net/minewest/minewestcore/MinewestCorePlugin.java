@@ -1,6 +1,7 @@
 package net.minewest.minewestcore;
 
 import net.minewest.minewestcore.afkutil.InactiveManager;
+import net.minewest.minewestcore.afkutil.listeners.InactiveDetectListener;
 import net.minewest.minewestcore.bedutil.BedSleepManager;
 import net.minewest.minewestcore.bedutil.commands.SleepCommand;
 import net.minewest.minewestcore.bedutil.listeners.PlayerListener;
@@ -21,6 +22,8 @@ public class MinewestCorePlugin extends JavaPlugin {
 
         this.getCommand("sleep").setExecutor(new SleepCommand(sleepManager));
         Bukkit.getPluginManager().registerEvents(new PlayerListener(sleepManager), this);
+        Bukkit.getPluginManager().registerEvents(new InactiveDetectListener(this, inactiveManager), this);
+
     }
 
     @Override
