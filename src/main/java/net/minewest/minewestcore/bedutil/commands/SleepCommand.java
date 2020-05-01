@@ -34,7 +34,7 @@ public class SleepCommand implements CommandExecutor {
             return false;
         }
 
-        if (!manager.isValidPlayer(player)) {
+        if (!manager.isInValidWorld(player)) {
             commandSender.sendMessage(ChatColor.RED + "You are not in an appropriate world!");
             return true;
         }
@@ -73,6 +73,11 @@ public class SleepCommand implements CommandExecutor {
                 }
             };
         }
+
+        if (manager.isInactive(player)) {
+            player.performCommand("afk");
+        }
+
         boolean requestsMet = manager.castVote(player.getUniqueId(), accept, messageRunnable);
 
         if (requestsMet) {
