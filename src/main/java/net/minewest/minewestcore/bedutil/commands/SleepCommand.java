@@ -34,7 +34,7 @@ public class SleepCommand implements CommandExecutor {
             return false;
         }
 
-        if (!manager.isInValidWorld(player)) {
+        if (!BedSleepManager.isInValidWorld(player)) {
             commandSender.sendMessage(ChatColor.RED + "You are not in an appropriate world!");
             return true;
         }
@@ -61,14 +61,14 @@ public class SleepCommand implements CommandExecutor {
         if (accept) {
             messageRunnable = new Runnable() {
                 public void run() {
-                    Bukkit.broadcastMessage(ChatColor.WHITE + Integer.toString(manager.getRequests()) + "/" +
+                    Bukkit.broadcastMessage(ChatColor.WHITE + Integer.toString(manager.getRequests(player.getWorld())) + "/" +
                             manager.getNeededRequests() + " " + ChatColor.GREEN + commandSender.getName() + " has accepted.");
                 }
             };
         } else {
             messageRunnable = new Runnable() {
                 public void run() {
-                    Bukkit.broadcastMessage(ChatColor.WHITE + Integer.toString(manager.getRequests()) + "/" +
+                    Bukkit.broadcastMessage(ChatColor.WHITE + Integer.toString(manager.getRequests(player.getWorld())) + "/" +
                             manager.getNeededRequests() + " " + ChatColor.RED + commandSender.getName() + " has denied.");
                 }
             };
@@ -78,7 +78,7 @@ public class SleepCommand implements CommandExecutor {
             player.performCommand("afk");
         }
 
-        boolean requestsMet = manager.castVote(player.getUniqueId(), accept, messageRunnable);
+        boolean requestsMet = manager.castVote(player.getUniqueId(), player.getWorld(), accept, messageRunnable);
 
         if (requestsMet) {
             Bukkit.broadcastMessage(ChatColor.GOLD + "Requests met!");

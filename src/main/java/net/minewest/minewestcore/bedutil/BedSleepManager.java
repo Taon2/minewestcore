@@ -29,7 +29,7 @@ public class BedSleepManager {
     private static final float REQUIRED_PLAYER_RATIO = 0.5f;
     private static final int MINIMUM_ABSOLUTE_REQUESTS = 1;
 
-    private Map<UUID, Boolean> requests = new HashMap<UUID, Boolean>();
+    private Map<UUID, Map<String, Boolean>> requests = new HashMap<UUID, Map<String, Boolean>>();
     private Set<UUID> sleepingPlayers = new HashSet<UUID>();
 
     private BukkitTask morningDisableTask;
@@ -129,11 +129,13 @@ public class BedSleepManager {
         }
     }
 
-    public boolean castVote(UUID player, boolean accept, Runnable messageRunnable) {
+    public boolean castVote(UUID player, World world, boolean accept, Runnable messageRunnable) {
         if (getEnabled()) {
-            requests.put(player, accept);
+            Map<String, Boolean> map = new HashMap<>();
+            map.put(world.getName(), accept);
+            requests.put(player, map);
         }
-        return checkRequired(messageRunnable);
+        return checkRequired(messageRunnable, world);
     }
 
     public boolean hasVoted(UUID player) {
@@ -155,7 +157,10 @@ public class BedSleepManager {
             }
         }
         removePlayers(toRemove);
-        checkRequired(null);
+
+        for (World world : Bukkit.getWorlds()) {
+            checkRequired(null, world);
+        }
     }
 
     private void resetRequests() {
@@ -163,10 +168,10 @@ public class BedSleepManager {
         requests.clear();
     }
 
-    public int getRequests() {
+    public int getRequests(World world) {
         int acceptances = 0;
         for (UUID player : requests.keySet()) {
-            if (requests.get(player)) {
+            if (requests.get(player).get(world.getName())) {
                 acceptances++;
             } else {
                 acceptances--;
@@ -175,24 +180,24 @@ public class BedSleepManager {
         return acceptances;
     }
 
-    private boolean checkRequired(Runnable messageRunnable) {
+    private boolean checkRequired(Runnable messageRunnable, World world) {
         if (messageRunnable != null) {
             messageRunnable.run();
         }
 
-        if (!getEnabled() || getRequests() < getNeededRequests()) {
+        if (!getEnabled() || getRequests(world) < getNeededRequests()) {
             return false;
         }
 
-        for (World world : Bukkit.getWorlds()) {
-            if (!isDay(world)) {
-                world.setTime(MORNING_START);
-            }
+        if (world == null) return false;
 
-            if (isThundering(world)) {
-                world.setThundering(false);
-                world.setStorm(false);
-            }
+        if (!isDay(world)) {
+            world.setTime(MORNING_START);
+        }
+
+        if (isThundering(world)) {
+            world.setThundering(false);
+            world.setStorm(false);
         }
 
         for (Player player : Bukkit.getOnlinePlayers()) {

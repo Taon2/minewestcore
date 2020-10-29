@@ -26,7 +26,9 @@ public class PlayerListener implements Listener {
             return;
         }
 
-        Bukkit.broadcastMessage(ChatColor.GOLD + event.getPlayer().getName() + " wants to sleep.");
+        for (Player player : event.getPlayer().getWorld().getPlayers()) {
+            player.sendMessage(ChatColor.GOLD + event.getPlayer().getName() + " wants to sleep in your world.");
+        }
 
         BaseComponent[] c = new ComponentBuilder("- ")
                 .color(net.md_5.bungee.api.ChatColor.DARK_GRAY)
@@ -42,7 +44,7 @@ public class PlayerListener implements Listener {
                 .color(net.md_5.bungee.api.ChatColor.DARK_GRAY)
                 .create();
 
-        for (Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : event.getPlayer().getWorld().getPlayers()) {
             player.spigot().sendMessage(c);
         }
 
