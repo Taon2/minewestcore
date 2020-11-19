@@ -1,7 +1,7 @@
 name: MinewestCore
 main: net.minewest.minewestcore.MinewestCorePlugin
 authors: [Taon2, spencrr]
-version: 1.3.2
+version: 1.3.3
 api-version: 1.16
 commands:
   sleep:
