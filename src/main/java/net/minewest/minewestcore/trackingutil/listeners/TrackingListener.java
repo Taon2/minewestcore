@@ -43,7 +43,12 @@ public class TrackingListener implements Listener {
                 Material.PURPLE_SHULKER_BOX,
                 Material.RED_SHULKER_BOX,
                 Material.WHITE_SHULKER_BOX,
-                Material.YELLOW_SHULKER_BOX
+                Material.YELLOW_SHULKER_BOX,
+                Material.DIAMOND_BLOCK,
+                Material.EMERALD_BLOCK,
+                Material.GOLD_BLOCK,
+                Material.NETHERITE_BLOCK,
+                Material.IRON_BLOCK
         );
 
         interactedBlocksToTrack = Arrays.asList(
